@@ -1,9 +1,13 @@
 package com.lorgen.calculator.component;
 
+import com.google.common.collect.Lists;
+
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 
-public class ExpressionComponentArray implements ExpressionComponent {
+@AssumedMultiplication
+public class ExpressionComponentArray implements ExpressionComponent, Iterable<ExpressionComponent> {
 
     private ExpressionComponent[] components;
 
@@ -45,6 +49,16 @@ public class ExpressionComponentArray implements ExpressionComponent {
         this.components = Arrays.stream(this.components)
           .filter(Objects::nonNull)
           .toArray(ExpressionComponent[]::new);
+    }
+
+    public void add(ExpressionComponent... components) {
+        this.components = Arrays.copyOf(this.components, this.components.length + components.length);
+        System.arraycopy(components, 0, this.components, this.components.length - components.length, components.length);
+    }
+
+    @Override
+    public Iterator<ExpressionComponent> iterator() {
+        return Lists.newArrayList(this.components).iterator();
     }
 
     @Override

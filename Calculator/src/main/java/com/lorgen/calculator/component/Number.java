@@ -4,7 +4,7 @@ import com.lorgen.calculator.component.operation.Multiplication;
 import com.lorgen.calculator.exception.CalculationException;
 import com.lorgen.calculator.util.UtilNumber;
 
-public class Number implements ExpressionComponent {
+public class Number implements ExpressionComponent, Cloneable {
 
     private double value;
 
@@ -105,5 +105,10 @@ public class Number implements ExpressionComponent {
         } catch (CalculationException e) {
             return "ERROR";
         }
+    }
+
+    @Override
+    protected Number clone() {
+        return new Number(this.value);
     }
 }

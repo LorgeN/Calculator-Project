@@ -6,12 +6,34 @@ import com.lorgen.calculator.component.NamedComponent;
 
 import java.util.Map;
 
-public class WorkSession {
+public class Session {
+
+    private static final Map<Long, Session> THREAD_SESSIONS = Maps.newConcurrentMap();
+
+    public static Session current() {
+        return THREAD_SESSIONS.get(Thread.currentThread().getId());
+    }
 
     private Map<String, ExpressionComponent> componentMap;
 
-    public WorkSession() {
+    private SessionThread thread;
+    private long threadId = -1;
+    private char naming;
+
+    public Session() {
         this.componentMap = Maps.newHashMap();
+        this.naming = 'a';
+
+        this.thread = new SessionThread(this);
+        this.thread.start();
+    }
+
+    public char getNextName() {
+        return this.naming++;
+    }
+
+    public void evaluate(String string) {
+
     }
 
     public <T extends ExpressionComponent> T getComponent(String string, Class<T> type) {
@@ -37,5 +59,19 @@ public class WorkSession {
 
     public void addComponent(String name, ExpressionComponent component) {
         this.componentMap.put(name, component);
+    }
+
+    public void setThreadId(long threadId) {
+        if (this.threadId != -1) {
+            THREAD_SESSIONS.remove(this.threadId);
+        }
+
+        this.threadId = threadId;
+        THREAD_SESSIONS.put(this.threadId, this);
+    }
+
+    public void undefineThread() {
+        THREAD_SESSIONS.remove(this.threadId);
+        this.threadId = -1;
     }
 }

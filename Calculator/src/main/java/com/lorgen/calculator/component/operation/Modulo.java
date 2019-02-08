@@ -23,7 +23,7 @@ public class Modulo implements ExpressionComponent {
     }
 
     @Override
-    public boolean isNumber() {
+    public boolean isNumber() throws CalculationException {
         return this.getDividend().isNumber() && this.getDivisor().isNumber();
     }
 

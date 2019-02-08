@@ -2,8 +2,8 @@ package com.lorgen.calculator.evalute;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.lorgen.calculator.operation.UnaryOperator;
-import com.lorgen.calculator.operation.BinaryOperator;
+import com.lorgen.calculator.component.operator.UnaryOperator;
+import com.lorgen.calculator.component.operator.BinaryOperator;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,9 +20,9 @@ public class PatternCompiler {
         Collections.addAll(this.delimiterList, BinaryOperator.values());
         Collections.addAll(this.delimiterList, UnaryOperator.values());
 
-        StringBuilder patternBuilder = new StringBuilder();
+        StringBuilder patternBuilder = new StringBuilder("\\d+\\.?\\d*|[a-z]");
         this.delimiterList.forEach(delimiter -> patternBuilder.append("|").append(delimiter.getPatternQuote()));
-        this.pattern = Pattern.compile(patternBuilder.substring(1));
+        this.pattern = Pattern.compile(patternBuilder.toString());
     }
 
     public List<Delimiter> getDelimiterList() {

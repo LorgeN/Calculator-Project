@@ -1,11 +1,11 @@
 package com.lorgen.terminal;
 
 import com.lorgen.calculator.Calculator;
-import com.lorgen.calculator.session.WorkSession;
+import com.lorgen.calculator.session.Session;
 
 public class JavaLauncher {
 
-    private static WorkSession session;
+    private static Session session;
 
     public static void main(String[] args) {
         session = Calculator.getNewSession();

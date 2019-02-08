@@ -1,4 +1,4 @@
-package com.lorgen.calculator.operation;
+package com.lorgen.calculator.component.operator;
 
 import com.lorgen.calculator.component.ExpressionComponent;
 import com.lorgen.calculator.component.ExpressionComponentArray;
@@ -59,6 +59,8 @@ public enum UnaryOperator implements Operator {
         this.delimiter = delimiter;
     }
 
+
+
     @Override
     public String asString() {
         return this.delimiter;
@@ -71,5 +73,15 @@ public enum UnaryOperator implements Operator {
 
     public static UnaryOperator fromString(String string) {
         return Arrays.stream(values()).filter(value -> value.getDelimiter().equalsIgnoreCase(string)).findFirst().orElse(null);
+    }
+
+    @Override
+    public boolean split() {
+        return false;
+    }
+
+    @Override
+    public OperatorPriority getPriority() {
+        return OperatorPriority.FIRST;
     }
 }

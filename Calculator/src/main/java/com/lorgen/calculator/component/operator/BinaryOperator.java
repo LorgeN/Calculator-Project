@@ -1,4 +1,4 @@
-package com.lorgen.calculator.operation;
+package com.lorgen.calculator.component.operator;
 
 import com.lorgen.calculator.component.ExpressionComponent;
 import com.lorgen.calculator.component.ExpressionComponentArray;
@@ -13,19 +13,19 @@ import com.lorgen.calculator.exception.CalculationException;
 import java.util.Arrays;
 
 public enum BinaryOperator implements Operator {
-    EXPONENT("^") {
+    EXPONENT("^", false, OperatorPriority.SECOND) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             return new Exponent(previous, following);
         }
     },
-    MODULO("%") {
+    MODULO("%", false, OperatorPriority.SECOND) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             return new Modulo(previous, following);
         }
     },
-    PLUS("+") {
+    PLUS("+", true, OperatorPriority.FOURTH) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             if (previous instanceof Addition) {
@@ -36,7 +36,7 @@ public enum BinaryOperator implements Operator {
             return new Addition(previous, following);
         }
     },
-    MINUS("-") {
+    MINUS("-", true, OperatorPriority.FOURTH) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             if (previous instanceof Subtraction) {
@@ -47,7 +47,7 @@ public enum BinaryOperator implements Operator {
             return new Subtraction(previous, following);
         }
     },
-    MULTIPLICATION("*") {
+    MULTIPLICATION("*", false, OperatorPriority.THIRD) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             if (previous instanceof Multiplication) {
@@ -58,7 +58,7 @@ public enum BinaryOperator implements Operator {
             return new Multiplication(previous, following);
         }
     },
-    DIVISION("/") {
+    DIVISION("/", false, OperatorPriority.THIRD) {
         @Override
         public ExpressionComponent getComponent(ExpressionComponent previous, ExpressionComponent following) {
             if (previous instanceof Division) {
@@ -71,11 +71,14 @@ public enum BinaryOperator implements Operator {
     };
 
     private String delimiter;
+    private boolean split;
+    private OperatorPriority priority;
 
-    BinaryOperator(String delimiter) {
+    BinaryOperator(String delimiter, boolean split, OperatorPriority priority) {
         this.delimiter = delimiter;
+        this.split = split;
+        this.priority = priority;
     }
-
 
     @Override
     public String asString() {
@@ -85,6 +88,16 @@ public enum BinaryOperator implements Operator {
     @Override
     public String getDelimiter() {
         return delimiter;
+    }
+
+    @Override
+    public boolean split() {
+        return split;
+    }
+
+    @Override
+    public OperatorPriority getPriority() {
+        return priority;
     }
 
     @Override

@@ -100,4 +100,9 @@ public class NumberDivision extends Number {
     public Number getDivisor() {
         return divisor;
     }
+
+    @Override
+    protected Number clone() {
+        return new NumberDivision(this.dividend, this.divisor);
+    }
 }

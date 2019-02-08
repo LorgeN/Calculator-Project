@@ -1,29 +1,31 @@
 package com.lorgen.calculator.component;
 
+import com.lorgen.calculator.component.operator.Operator;
 import com.lorgen.calculator.exception.CalculationException;
-import com.lorgen.calculator.operation.Operator;
+
+import java.util.Optional;
 
 public interface ExpressionComponent {
 
     String asString();
 
-    default ExpressionComponent abbreviate() {
-        return this;
+    default Optional<ExpressionComponent> compute() throws CalculationException {
+        return Optional.of(this);
     }
 
-    default boolean assumeMultiplication() {
+    default boolean assumeMultiplication() throws CalculationException {
         return this.getClass().getAnnotation(AssumedMultiplication.class) != null;
     }
 
-    default boolean isOperator() {
+    default boolean isOperator() throws CalculationException {
         return this instanceof Operator;
     }
 
-    default Operator asOperator() {
+    default Operator asOperator() throws CalculationException {
         return (Operator) this;
     }
 
-    default boolean isNumber() {
+    default boolean isNumber() throws CalculationException {
         return this instanceof Number;
     }
 
@@ -31,11 +33,11 @@ public interface ExpressionComponent {
         return (Number) this;
     }
 
-    default boolean hasAssociatedNumber() {
+    default boolean hasAssociatedNumber() throws CalculationException {
         return this.isNumber() || this.hasCoefficient();
     }
 
-    default Number getAssociatedNumber() {
+    default Number getAssociatedNumber() throws CalculationException {
         if (this.isNumber()) {
             return this.asNumber();
         }
@@ -43,11 +45,11 @@ public interface ExpressionComponent {
         return this.getCoefficient();
     }
 
-    default boolean hasCoefficient() {
+    default boolean hasCoefficient() throws CalculationException {
         return !this.isOperator() && !this.isNumber();
     }
 
-    default Number getCoefficient() {
+    default Number getCoefficient() throws CalculationException {
         if (!this.hasCoefficient()) {
             throw new UnsupportedOperationException("Component doesn't have a coefficient");
         }

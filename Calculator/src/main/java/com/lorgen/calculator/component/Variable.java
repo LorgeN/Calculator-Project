@@ -1,22 +1,23 @@
 package com.lorgen.calculator.component;
 
 import com.lorgen.calculator.exception.CalculationException;
+import com.lorgen.calculator.session.Session;
 
 import java.util.Objects;
 
 @AssumedMultiplication
 public class Variable implements ExpressionComponent {
 
+    private static final boolean DO_NEGATIVE_EXPONENT = true;
+
     private String name;
-    private int degree;
+    private int exponent;
     private Number coefficient;
 
     public Variable(String name) {
         this.name = name;
-        this.degree = 1;
+        this.exponent = 1;
         this.coefficient = new Number(1.0);
-
-        ThreadLocalVariables.current().add(name);
     }
 
     public String getName() {
@@ -30,12 +31,22 @@ public class Variable implements ExpressionComponent {
 
     @Override
     public boolean isNumber() {
-        return ThreadLocalVariables.current().hasValue(this.getName());
+        Number number = Session.current().getComponent(this.getName(), Number.class);
+        return number != null || this.exponent == 0 || this.coefficient.isZero();
     }
 
     @Override
-    public Number asNumber() {
-        return new Number(this.getCoefficient().asDouble() * ThreadLocalVariables.current().getValue(this.getName()).asDouble());
+    public Number asNumber() throws CalculationException {
+        if (this.coefficient.isZero()) {
+            return new Number(0.0);
+        }
+
+        if (this.exponent == 0) {
+            return this.coefficient.clone();
+        }
+
+        // Clone to avoid modifying definition
+        return Session.current().getComponent(this.getName(), Number.class).clone();
     }
 
     @Override
@@ -43,32 +54,84 @@ public class Variable implements ExpressionComponent {
         return this.coefficient;
     }
 
-    public int getDegree() {
-        return degree;
+    public int getExponent() {
+        return exponent;
     }
 
     public void addDegree(int amount) {
-        this.degree += amount;
+        this.exponent += amount;
     }
 
     public void removeDegree(int amount) {
-        this.degree -= amount;
+        this.exponent -= amount;
     }
 
-    public boolean canAdd(Variable variable) {
-        return Objects.equals(variable.getName(), this.getName()) && this.getDegree() == variable.getDegree();
+    public boolean isSame(Variable variable) {
+        return Objects.equals(variable.getName(), this.getName());
     }
 
-    public void add(Variable variable) throws CalculationException {
+    public boolean canAddSubtract(Variable variable) {
+        return this.isSame(variable) && this.getExponent() == variable.getExponent();
+    }
+
+    public boolean canMultiplyDivide(Variable variable) {
+        return this.isSame(variable);
+    }
+
+    public boolean add(Variable variable) throws CalculationException {
         if (!Objects.equals(variable.getName(), this.getName())) {
             throw new CalculationException("Can't add differently named variable to this!");
         }
 
-        if (this.getDegree() != variable.getDegree()) {
+        if (this.getExponent() != variable.getExponent()) {
             throw new CalculationException("Can't add variable of different degree to this one!");
         }
 
         this.getCoefficient().add(variable.getCoefficient());
-        variable.getCoefficient().setValue(0); // This way we make sure to avoid any potential issues
+        return true;
+    }
+
+    public boolean subtract(Variable variable) throws CalculationException {
+        if (!Objects.equals(variable.getName(), this.getName())) {
+            throw new CalculationException("Can't subtract differently named variable to this!");
+        }
+
+        if (this.getExponent() != variable.getExponent()) {
+            throw new CalculationException("Can't subtract variable of different degree to this one!");
+        }
+
+        this.getCoefficient().subtract(variable.getCoefficient());
+        return true;
+    }
+
+    public boolean multiply(Variable variable) throws CalculationException {
+        if (!Objects.equals(variable.getName(), this.getName())) {
+            throw new CalculationException("Can't subtract differently named variable to this!");
+        }
+
+        Number coefficient = variable.getCoefficient();
+        this.getCoefficient().multiply(coefficient);
+
+        this.exponent += variable.exponent;
+        return true;
+    }
+
+    public boolean divide(Variable variable) throws CalculationException {
+        if (!Objects.equals(variable.getName(), this.getName())) {
+            throw new CalculationException("Can't subtract differently named variable to this!");
+        }
+
+        Number otherCoefficient = variable.getCoefficient();
+        Number localCoefficient = this.getCoefficient();
+        this.coefficient = NumberDivision.getExactDivision(localCoefficient, otherCoefficient);
+
+        if (DO_NEGATIVE_EXPONENT || this.exponent >= variable.exponent) {
+            this.exponent -= variable.exponent;
+            return true;
+        }
+
+        variable.exponent -= this.exponent;
+        this.exponent = 0;
+        return false;
     }
 }
